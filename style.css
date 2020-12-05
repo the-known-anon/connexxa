@@ -1,0 +1,19 @@
+/* CSS files add styling rules to your content */
+
+body {
+  font-family: helvetica, arial, roboto;
+  margin: 2em;
+  background-color: #1A1A1A; 
+}
+
+h1 {
+  font-style: bold;
+  text-align: center;
+  color: #FFFFFF;
+  padding: 10px;
+
+.container {
+  background-color: #333333;
+  border-radius: 16px;
+  
+}
