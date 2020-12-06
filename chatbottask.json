@@ -1,83 +1,525 @@
-//greetings
 {
-	"actions": [
-		{
-			"say": "Hello, would you like to start the health check-in process?"
-		},
-		{
-			"listen": true
-		}
-	]
-}
-
-//collect health data
-
-{
-	"actions": [
-		{
-			"say": "Let's get started!"
-		},
-		{
-			"collect": {
-				"name": "health_data",
-				"questions": [
-					{
-						"question": "What's your first name?",
-						"name": "first_name",
-						"type": "Twilio.FIRST_NAME"
-					},
-					{
-						"question": "What is your blood glucose level today?",
-						"name": "blood_glucose",
-						"type": "Twilio.NUMBER"
-					},
-					{
-						"question": "What is your systolic blood pressure?",
-						"name": "systolic_bp",
-						"type": "Twilio.NUMBER"
-					},
-					{
-						"question": "What is your diastolic blood pressure?",
-						"name": "diastolic_bp",
-						"type": "Twilio.NUMBER"
-					},
-					{
-						"question": "Got it. Thank you! Bye!",
-						"name": "closing"
-					}
-				],
-				"on_complete": {
-					"redirect": {
-						"method": "POST",
-						"uri": "https://connexbot-sfb9-default-rtdb.firebaseio.com/"
-					}
-				}
-			}
-		}
-	]
-}
-
-//fallback
-{
-	"actions": [
-		{
-			"say": "I'm sorry didn't quite get that. Please say that again."
-		},
-		{
-			"listen": true
-		}
-	]
-}
-
-//collect fall back
-
-{
-	"actions": [
-		{
-			"say": "Looks like I'm having trouble. Apologies for that. Let's start again, would you like to start the health check-in process?"
-		},
-		{
-			"listen": true
-		}
-	]
+  "description": "A New Flow",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "start",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "name": "start",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_1",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "next": "start",
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -126,
+          "y": 141
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "Hello, would you like to start the health check-in process?",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "split_1",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "fallback_1",
+          "event": "noMatch"
+        },
+        {
+          "next": "get_bp",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of Yes, Yep, Yeah, sure, why not, of course, sure",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "Yes, Yep, Yeah, sure, why not, of course, sure"
+            }
+          ]
+        },
+        {
+          "next": "end",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of no thanks, no, nope, don't, later, ugh, ah, ehmm, hmm",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "no thanks, no, nope, don't, later, ugh, ah, ehmm, hmm"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.start.inbound.Body}}",
+        "offset": {
+          "x": -140,
+          "y": 400
+        }
+      }
+    },
+    {
+      "name": "get_bp",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_2",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "next": "get_bp",
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -2,
+          "y": 596
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "What's your blood glucose level? Please provide the value in mg/dL",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "fallback_1",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "split_1",
+          "event": "sent"
+        },
+        {
+          "next": "fallback_1",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -530,
+          "y": 200
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Sorry I don't understand, can you say YES or NO?"
+      }
+    },
+    {
+      "name": "get_systolicBP",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_3",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "next": "get_systolicBP",
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -200,
+          "y": 1260
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "What's your systolic blood pressure? Tip: it is the number on the top",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "get_diastolicBP",
+      "type": "send-and-wait-for-reply",
+      "transitions": [
+        {
+          "next": "split_4",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "timeout"
+        },
+        {
+          "next": "get_diastolicBP",
+          "event": "deliveryFailure"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -190,
+          "y": 1850
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "body": "What's your diastolic blood pressure? Tip: it is the number at the bottom",
+        "timeout": "3600"
+      }
+    },
+    {
+      "name": "end",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 412,
+          "y": 621
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "No worries, let me know when you have the values. See you:)"
+      }
+    },
+    {
+      "name": "http_1",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "get_systolicBP",
+          "event": "success"
+        },
+        {
+          "next": "get_systolicBP",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -780,
+          "y": 1210
+        },
+        "method": "POST",
+        "content_type": "application/x-www-form-urlencoded;charset=utf-8",
+        "url": "https://connexbot-sfb9-default-rtdb.firebaseio.com/"
+      }
+    },
+    {
+      "name": "split_2",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "fallback2",
+          "event": "noMatch"
+        },
+        {
+          "next": "http_1",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value regex ([5-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "regex",
+              "value": "([5-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)"
+            }
+          ]
+        },
+        {
+          "next": "get_systolicBP",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of skip, skip please, skip thanks",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "skip, skip please, skip thanks"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.start.inbound.Body}}",
+        "offset": {
+          "x": -590,
+          "y": 900
+        }
+      }
+    },
+    {
+      "name": "fallback2",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "split_2",
+          "event": "sent"
+        },
+        {
+          "next": "fallback2",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -830,
+          "y": 660
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "You can find the values on your blood glucose meter. Please reply SKIP if you don't have a meter"
+      }
+    },
+    {
+      "name": "split_3",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "send_message_4",
+          "event": "noMatch"
+        },
+        {
+          "next": "http_2",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value regex ([3-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "regex",
+              "value": "([3-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)"
+            }
+          ]
+        },
+        {
+          "next": "End",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of skip, skip thanks, skip it",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "matches_any_of",
+              "value": "skip, skip thanks, skip it"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.start.inbound.Body}}",
+        "offset": {
+          "x": -550,
+          "y": 1600
+        }
+      }
+    },
+    {
+      "name": "http_2",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "get_diastolicBP",
+          "event": "success"
+        },
+        {
+          "next": "get_diastolicBP",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -912,
+          "y": 1528
+        },
+        "method": "POST",
+        "content_type": "application/x-www-form-urlencoded;charset=utf-8",
+        "url": "https://connexbot-sfb9-default-rtdb.firebaseio.com/"
+      }
+    },
+    {
+      "name": "http_3",
+      "type": "make-http-request",
+      "transitions": [
+        {
+          "next": "End",
+          "event": "success"
+        },
+        {
+          "next": "End",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": -1031,
+          "y": 1856
+        },
+        "method": "POST",
+        "content_type": "application/x-www-form-urlencoded;charset=utf-8",
+        "url": "https://connexbot-sfb9-default-rtdb.firebaseio.com/"
+      }
+    },
+    {
+      "name": "send_message_4",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "split_3",
+          "event": "sent"
+        },
+        {
+          "next": "send_message_4",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 230,
+          "y": 1580
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "You can find the values on your blood pressure meter. Please reply SKIP if you don't have a meter"
+      }
+    },
+    {
+      "name": "End",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "next": "End",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 188,
+          "y": 1829
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "Health check-in is completed. Goodbye!"
+      }
+    },
+    {
+      "name": "split_4",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "next": "Copy_of_send_message_4",
+          "event": "noMatch"
+        },
+        {
+          "next": "http_3",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value regex ([3-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)",
+              "arguments": [
+                "{{widgets.start.inbound.Body}}"
+              ],
+              "type": "regex",
+              "value": "([3-8][0-9]|9[0-9]|[1-3][0-9]{2}|400)"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.start.inbound.Body}}",
+        "offset": {
+          "x": -310,
+          "y": 2080
+        }
+      }
+    },
+    {
+      "name": "Copy_of_send_message_4",
+      "type": "send-message",
+      "transitions": [
+        {
+          "next": "End",
+          "event": "sent"
+        },
+        {
+          "next": "Copy_of_send_message_4",
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 240,
+          "y": 2080
+        },
+        "service": "{{trigger.message.InstanceSid}}",
+        "channel": "{{trigger.message.ChannelSid}}",
+        "from": "{{flow.channel.address}}",
+        "to": "{{contact.channel.address}}",
+        "body": "You can find the values on your blood pressure meter. Please reply SKIP if you don't have a meter"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
 }
