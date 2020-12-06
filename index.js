@@ -19,44 +19,44 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   const agent = new WebhookClient({ request, response });
  
   function getBgHandler(agent) {
-    const bg = agent.parameters.bg;
-    const dialogflowAgentRef = db.collection('bg').doc('bg');
+    const blood_glucose = agent.parameters.blood_glucose;
+    const dialogflowAgentRef = db.collection('blood_glucose').doc('blood_glucose');
 	return db.runWrite(w => {
-      w.set(dialogflowAgentRef, {entry: bg});
+      w.set(dialogflowAgentRef, {entry: blood_glucose});
       return Promise.resolve('Write complete');
     }).then(doc => {
-      bg.add(`Wrote "${bg}" to the Firestore database.`);
+      blood_glucose.add(`Wrote "${blood_glucose}" to the Firestore database.`);
     }).catch(err => {
       console.log(`Error writing to Firestore: ${err}`);
-      bg.add(`Failed to write "${bg}" to the Firestore database.`);
+      blood_glucose.add(`Failed to write "${blood_glucose}" to the Firestore database.`);
     });
   }
   
  function getSbpHandler(agent) {
-    const Sbp = agent.parameters.Sbp;
-    const dialogflowAgentRef1 = db.collection('Sbp').doc('Sbp');
+    const systolic_bp = agent.parameters.systolic_bp;
+    const dialogflowAgentRef1 = db.collection('systolic_bp').doc('systolic_bp');
 	return db.runWrite(w => {
-      w.set(dialogflowAgentRef1, {entry: Sbp});
+      w.set(dialogflowAgentRef1, {entry: systolic_bp});
       return Promise.resolve('Write complete');
     }).then(doc => {
-      Sbp.add(`Wrote "${Sbp}" to the Firestore database.`);
+      systolic_bp.add(`Wrote "${systolic_bp}" to the Firestore database.`);
     }).catch(err => {
       console.log(`Error writing to Firestore: ${err}`);
-      Sbp.add(`Failed to write "${Sbp}" to the Firestore database.`);
+      systolic_bp.add(`Failed to write "${systolic_bp}" to the Firestore database.`);
     });
   } 
  
    function getDbpHandler(agent) {
-    const Dbp = agent.parameters.Dbp;
-    const dialogflowAgentRef2 = db.collection('Dbp').doc('Dbp');
+    const diastolic_bp = agent.parameters.diastolic_bp;
+    const dialogflowAgentRef2 = db.collection('diastolic_bp').doc('diastolic_bp');
 	return db.runWrite(w => {
-      w.set(dialogflowAgentRef2, {entry: Dbp});
+      w.set(dialogflowAgentRef2, {entry: diastolic_bp});
       return Promise.resolve('Write complete');
     }).then(doc => {
-      Dbp.add(`Wrote "${Dbp}" to the Firestore database.`);
+      diastolic_bp.add(`Wrote "${diastolic_bp}" to the Firestore database.`);
     }).catch(err => {
       console.log(`Error writing to Firestore: ${err}`);
-      Dbp.add(`Failed to write "${Dbp}" to the Firestore database.`);
+      diastolic_bp.add(`Failed to write "${diastolic_bp}" to the Firestore database.`);
     });
   } 
   
