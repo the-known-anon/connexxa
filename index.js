@@ -3,9 +3,15 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const {WebhookClient} = require('dialogflow-fulfillment');
+const {Card, Suggestion} = require('dialogflow-fulfillment');
 
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
-admin.initializeApp(functions.config().firebase);
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  databaseURL: 'ws://connexbot-sfb9-default-rtdb.firebaseio.com/'
+
+});
 admin.initializeApp();
 const db = admin.firestore();
  
