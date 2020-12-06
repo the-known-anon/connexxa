@@ -12,7 +12,6 @@ admin.initializeApp({
   databaseURL: "ws://connexbot-sfb9-default-rtdb.firebaseio.com/"
 });
 admin.initializeApp();
-const db = admin.firestore();
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(
   (request, response) => {
