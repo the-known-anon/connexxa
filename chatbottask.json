@@ -1,0 +1,83 @@
+//greetings
+{
+	"actions": [
+		{
+			"say": "Hello, would you like to start the health check-in process?"
+		},
+		{
+			"listen": true
+		}
+	]
+}
+
+//collect health data
+
+{
+	"actions": [
+		{
+			"say": "Let's get started!"
+		},
+		{
+			"collect": {
+				"name": "health_data",
+				"questions": [
+					{
+						"question": "What's your first name?",
+						"name": "first_name",
+						"type": "Twilio.FIRST_NAME"
+					},
+					{
+						"question": "What is your blood glucose level today?",
+						"name": "blood_glucose",
+						"type": "Twilio.NUMBER"
+					},
+					{
+						"question": "What is your systolic blood pressure?",
+						"name": "systolic_bp",
+						"type": "Twilio.NUMBER"
+					},
+					{
+						"question": "What is your diastolic blood pressure?",
+						"name": "diastolic_bp",
+						"type": "Twilio.NUMBER"
+					},
+					{
+						"question": "Got it. Thank you! Bye!",
+						"name": "closing"
+					}
+				],
+				"on_complete": {
+					"redirect": {
+						"method": "POST",
+						"uri": "https://connexbot-sfb9-default-rtdb.firebaseio.com/"
+					}
+				}
+			}
+		}
+	]
+}
+
+//fallback
+{
+	"actions": [
+		{
+			"say": "I'm sorry didn't quite get that. Please say that again."
+		},
+		{
+			"listen": true
+		}
+	]
+}
+
+//collect fall back
+
+{
+	"actions": [
+		{
+			"say": "Looks like I'm having trouble. Apologies for that. Let's start again, would you like to start the health check-in process?"
+		},
+		{
+			"listen": true
+		}
+	]
+}
