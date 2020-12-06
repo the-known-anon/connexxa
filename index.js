@@ -20,20 +20,20 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
  
   function getBgHandler(agent) {
     const blood_glucose = agent.parameters.blood_glucose;
-    return admin.database().ref('data').set({
+    return admin.database().ref('data1').set({
       blood_glucose: '100',
     });
   }
  
  function getSbpHandler(agent) {
     const systolic_bp = agent.parameters.systolic_bp;
-    return admin.database().ref('data').set({
+    return admin.database().ref('data2').set({
       systolic_bp: '120',
     });
  }
    function getDbpHandler(agent) {
     const diastolic_bp = agent.parameters.diastolic_bp;
-    return admin.database().ref('data').set({
+    return admin.database().ref('data3').set({
       diastolic_bp: '80',
     });
    }
